@@ -9,6 +9,7 @@ import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffectType;
@@ -21,14 +22,25 @@ public class OWHCheatCodes extends JavaPlugin{
 	
 	public void onEnable()
 	{
+		this.saveDefaultConfig();
+		
+		ConfigurationSerialization.registerClass(CheatCode.class,"CheatCode");
+		
 		permissions = new Permissions(this);
 		
 		permissions.setupPermissions();
 		permissions.setupEconomy();
+		
+		@SuppressWarnings("unchecked")
+		List<CheatCode> configCheats = (List<CheatCode>)this.getConfig().getList("OWH.Cheats.CheatCodes");
+		
+		if(configCheats != null)
+			cheats = configCheats;
 	}
 	
 	public void onDisable()
 	{
+		this.getConfig().set("OWH.Cheats.CheatCodes", cheats);
 		this.saveConfig();
 	}
 	

@@ -3,13 +3,18 @@ package info.insomniax.cheatcodes.core;
 import info.insomniax.cheatcodes.permissions.Permissions;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.bukkit.configuration.serialization.ConfigurationSerializable;
+import org.bukkit.configuration.serialization.SerializableAs;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-public class CheatCode {
+@SerializableAs("CheatCode")
+public class CheatCode implements ConfigurationSerializable{
 	
 	public static int CHEAT_COUNT = 0;
 	public final int id;
@@ -34,6 +39,21 @@ public class CheatCode {
 		CHEAT_COUNT++;
 	}
 	
+	@SuppressWarnings("unchecked")
+	public CheatCode(Map<String,Object> map)
+	{
+		this.code = (String)map.get("code");
+		this.potionEffects = (List<PotionEffect>)map.get("effects");
+		this.money = (int) map.get("money");
+		this.health = (int) map.get("health");
+		this.damage = (int) map.get("damage");
+		this.kick = (boolean) map.get("kick");
+		this.kickMessage = (String) map.get("kickmessage");
+		
+		this.id = CHEAT_COUNT;
+		CHEAT_COUNT++;
+	}
+	
 	public void applyCheat(Player player)
 	{
 		for(PotionEffect p : potionEffects)
@@ -46,7 +66,7 @@ public class CheatCode {
 			if(health+player.getHealth() > player.getMaxHealth())
 				player.setHealth(player.getMaxHealth());
 			else
-				player.setHealth(health);
+				player.setHealth(health+player.getHealth());
 		if(damage > 0)
 			player.damage(damage);
 		if(kick)
@@ -109,6 +129,21 @@ public class CheatCode {
 			}
 		}
 		return true;
+	}
+
+	@Override
+	public Map<String, Object> serialize() {
+		HashMap<String,Object> map = new HashMap<String,Object>();
+		
+		map.put("health", health);
+		map.put("damage", damage);
+		map.put("money", money);
+		map.put("kick", kick);
+		map.put("kickmessage", kickMessage);
+		map.put("effects", potionEffects);
+		map.put("code", code);
+	
+		return map;
 	}
 
 }
