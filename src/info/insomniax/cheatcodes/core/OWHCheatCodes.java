@@ -11,7 +11,6 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.potion.PotionEffect;
 
 public class OWHCheatCodes extends JavaPlugin{
 	
@@ -44,10 +43,18 @@ public class OWHCheatCodes extends JavaPlugin{
 						return false;
 					
 					String cheatCode = StringUtils.join(args, " ");
-					if(cheats.contains(cheatCode))
+					boolean cheatExists = false;
+					
+					for(CheatCode cheat : cheats)
 					{
+						if(cheat.code.equalsIgnoreCase(cheatCode))
+						{
+							cheat.applyCheat((Player)sender);
+							cheatExists = true;
+						}
 					}
-					else
+					
+					if(!cheatExists)
 					{
 						this.sendMessage(sender, ChatColor.RED+"Invalid cheatcode!");
 						((Player)sender).damage(1.0);
@@ -63,13 +70,50 @@ public class OWHCheatCodes extends JavaPlugin{
 		{
 			if(permissions.has(sender, Permissions.getBaseNode()+".moderator"))
 			{
+				if(args.length > 2)
+				{
+					if(args[0].equalsIgnoreCase("addeffects"))
+					{
+						CheatCode cheat = null;
+						
+						for(CheatCode c : cheats)
+						{
+							if(c.code.equalsIgnoreCase(args[1]))
+							{
+								cheat = c;
+							}
+						}
+						
+						if(cheat == null)
+						{
+							try
+							{
+								int codeIndex = Integer.parseInt(args[1]);
+								cheat = cheats.get(codeIndex);
+							} catch (NumberFormatException e)
+							{
+								sendMessage(sender, "Couldn't find that cheat.");
+								return true;
+							}
+						}
+						
+						//By now, we have successfully found a cheatcode
+						
+						String[] effects = args[2].split(",");
+						
+						cheat.addEffects(effects);
+						
+						return true;
+					}
+				}
 				if(args.length > 1)
 				{
-					if(args[0].equalsIgnoreCase("add"))
+					if(args[0].equalsIgnoreCase("create"))
 					{
-						
+						CheatCode cheat = new CheatCode(args[1]);					
+						return true;
 					}
-				}				
+				}	
 			}
 		}
 		return false;

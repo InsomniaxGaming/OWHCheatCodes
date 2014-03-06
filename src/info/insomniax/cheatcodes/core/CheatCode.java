@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 public class CheatCode {
 	
@@ -36,17 +37,64 @@ public class CheatCode {
 			Permissions.economy.bankWithdraw(player.getName(), Math.abs(money));
 		if(health > 0)
 			player.setHealth(player.getHealth()+health);
+		if(damage > 0)
+			player.damage(damage);
 		if(kick)
 			player.kickPlayer(kickMessage);
 	}
 	
-	@Override
-	public boolean equals(Object o)
+	public void addEffects(String[] effects)
 	{
-		if(o instanceof String)
-			return code.equalsIgnoreCase((String)o);
-		else
-			return super.equals(o);
+		for(String e : effects)
+		{
+			if(e.startsWith("kick(") && e.endsWith(")"))
+			{
+				kick = true;
+				kickMessage = e.substring(e.indexOf("("),e.lastIndexOf(")"));
+			}
+			else if(e.startsWith("heal(") && e.endsWith(")"))
+			{
+				try
+				{
+					health = Integer.parseInt(e.substring(e.indexOf("("),e.lastIndexOf(")")));
+				} catch (NumberFormatException ex){}
+			}
+			else if(e.startsWith("money(") && e.endsWith(")"))
+			{
+				try
+				{
+					money = Integer.parseInt(e.substring(e.indexOf("("),e.lastIndexOf(")")));
+				} catch (NumberFormatException ex){}
+			}
+			else if(e.startsWith("damage(") && e.endsWith(")"))
+			{
+				try
+				{
+					damage = Integer.parseInt(e.substring(e.indexOf("("),e.lastIndexOf(")")));
+				} catch (NumberFormatException ex){}
+			}
+			if(e.startsWith("effect(") && e.endsWith(")"))
+			{
+				String[] details = e.substring(e.indexOf("("),e.lastIndexOf(")")).split(",");
+				
+				if(details.length > 2)
+				{			
+					PotionEffectType type = PotionEffectType.getByName(details[0]);
+					int duration;
+					int amplifier;
+					
+					try
+					{
+						duration = Integer.parseInt(details[1]);
+						amplifier = Integer.parseInt(details[2]);
+					} catch (NumberFormatException ex) { continue; }
+					
+					if(type != null)
+						potionEffects.add(new PotionEffect(type, duration, amplifier));
+				}
+				
+			}
+		}
 	}
 
 }
