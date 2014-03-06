@@ -2,6 +2,7 @@ package info.insomniax.cheatcodes.core;
 
 import info.insomniax.cheatcodes.permissions.Permissions;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.entity.Player;
@@ -10,8 +11,11 @@ import org.bukkit.potion.PotionEffectType;
 
 public class CheatCode {
 	
+	public static int CHEAT_COUNT = 0;
+	public final int id;
+	
 	String code;
-	List<PotionEffect> potionEffects; // potion effects to apply
+	List<PotionEffect> potionEffects = new ArrayList<PotionEffect>(); // potion effects to apply
 	
 	int money = 0; // amount of money to add
 	
@@ -25,6 +29,9 @@ public class CheatCode {
 	public CheatCode(String code)
 	{
 		this.code = code;
+		
+		id=CHEAT_COUNT;
+		CHEAT_COUNT++;
 	}
 	
 	public void applyCheat(Player player)
@@ -43,39 +50,40 @@ public class CheatCode {
 			player.kickPlayer(kickMessage);
 	}
 	
-	public void addEffects(String[] effects)
+	public boolean addEffects(String[] effects)
 	{
 		for(String e : effects)
 		{
 			if(e.startsWith("kick(") && e.endsWith(")"))
 			{
 				kick = true;
-				kickMessage = e.substring(e.indexOf("("),e.lastIndexOf(")"));
+				kickMessage = e.substring(e.indexOf("(")+1,e.lastIndexOf(")"));
 			}
 			else if(e.startsWith("heal(") && e.endsWith(")"))
 			{
 				try
 				{
-					health = Integer.parseInt(e.substring(e.indexOf("("),e.lastIndexOf(")")));
-				} catch (NumberFormatException ex){}
+					health = Integer.parseInt(e.substring(e.indexOf("(")+1,e.lastIndexOf(")")));
+				} catch (NumberFormatException ex){ return false; }
 			}
 			else if(e.startsWith("money(") && e.endsWith(")"))
 			{
 				try
 				{
-					money = Integer.parseInt(e.substring(e.indexOf("("),e.lastIndexOf(")")));
-				} catch (NumberFormatException ex){}
+					money = Integer.parseInt(e.substring(e.indexOf("(")+1,e.lastIndexOf(")")));
+				} catch (NumberFormatException ex){ return false; }
 			}
 			else if(e.startsWith("damage(") && e.endsWith(")"))
 			{
 				try
 				{
-					damage = Integer.parseInt(e.substring(e.indexOf("("),e.lastIndexOf(")")));
-				} catch (NumberFormatException ex){}
+					System.out.println(e.substring(e.indexOf("(")+1,e.lastIndexOf(")")));
+					damage = Integer.parseInt(e.substring(e.indexOf("(")+1,e.lastIndexOf(")")));
+				} catch (NumberFormatException ex){ return false; }
 			}
 			if(e.startsWith("effect(") && e.endsWith(")"))
 			{
-				String[] details = e.substring(e.indexOf("("),e.lastIndexOf(")")).split(",");
+				String[] details = e.substring(e.indexOf("(")+1,e.lastIndexOf(")")).split(",");
 				
 				if(details.length > 2)
 				{			
@@ -95,6 +103,7 @@ public class CheatCode {
 				
 			}
 		}
+		return true;
 	}
 
 }

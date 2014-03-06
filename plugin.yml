@@ -1,0 +1,13 @@
+name: OWHCheatCodes
+version: 0.1
+description: "Get rich or get dead trying to find cheatcodes!"
+main: info.insomniax.cheatcodes.core.OWHCheatCodes
+commands:
+  cheat:
+    usage: "/cheat <cheatcode>"
+  owhcheatcodes:
+    usage: |
+      /owhcheatcodes create <code>
+      /owhcheatcodes addeffects <effects>
+      /owhcheatcodes list
+      /owhcheatcodes listeffects

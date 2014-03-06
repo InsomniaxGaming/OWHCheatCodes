@@ -101,7 +101,10 @@ public class OWHCheatCodes extends JavaPlugin{
 						
 						String[] effects = args[2].split(",");
 						
-						cheat.addEffects(effects);
+						if(cheat.addEffects(effects))
+							sendMessage(sender,"Effects successfully added");
+						else
+							sendMessage(sender,"There was an error in your syntax");
 						
 						return true;
 					}
@@ -110,7 +113,10 @@ public class OWHCheatCodes extends JavaPlugin{
 				{
 					if(args[0].equalsIgnoreCase("create"))
 					{
-						CheatCode cheat = new CheatCode(args[1]);					
+						CheatCode cheat = new CheatCode(args[1]);
+						cheats.add(cheat);
+						
+						sendMessage(sender,"CheatCode (id #"+cheat.id+") added!");
 						return true;
 					}
 				}	
