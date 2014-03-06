@@ -11,6 +11,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.potion.PotionEffectType;
 
 public class OWHCheatCodes extends JavaPlugin{
 	
@@ -120,6 +121,36 @@ public class OWHCheatCodes extends JavaPlugin{
 						return true;
 					}
 				}	
+				if(args.length > 0)
+				{
+					if(permissions.has(sender, Permissions.getBaseNode()+".moderator"))
+					{
+						if(args[0].equalsIgnoreCase("list"))
+						{
+							for(CheatCode cheat : cheats)
+							{
+								sendMessage(sender,cheat.id+": "+cheat.code);
+								sendMessage(sender,"Effects:");
+								sendMessage(sender,StringUtils.join(cheat.potionEffects,", "));
+								
+								String kick = String.valueOf(cheat.kick);
+								
+								if(cheat.kick)
+									kick += "-" + cheat.kickMessage;
+									
+								sendMessage(sender,"Health:"+cheat.health+" Damage:"+cheat.damage+" Kick:"+kick+" Money:"+cheat.money);
+							}						
+							
+							return true;
+						}
+						if(args[0].equalsIgnoreCase("listeffects"))
+						{
+							sendMessage(sender,StringUtils.join(PotionEffectType.values(), ", "));
+							
+							return true;
+						}
+					}
+				}
 			}
 		}
 		return false;

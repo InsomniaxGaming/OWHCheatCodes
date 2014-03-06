@@ -7,7 +7,13 @@ commands:
     usage: "/cheat <cheatcode>"
   owhcheatcodes:
     usage: |
+
       /owhcheatcodes create <code>
-      /owhcheatcodes addeffects <effects>
+      /owhcheatcodes addeffects <id or code> <effects>
+      -Effects should be seperated by commas, and in the format of effect(<effect>:<duration>:<amplifier>), or one of the custom effects:
+        -kick(<message>)
+        -damage(<amount>)
+        -heal(<amount>)
+        -money(<amount>) (negative will withdraw)
       /owhcheatcodes list
       /owhcheatcodes listeffects

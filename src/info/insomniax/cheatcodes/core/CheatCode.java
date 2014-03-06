@@ -83,7 +83,7 @@ public class CheatCode {
 			}
 			if(e.startsWith("effect(") && e.endsWith(")"))
 			{
-				String[] details = e.substring(e.indexOf("(")+1,e.lastIndexOf(")")).split(",");
+				String[] details = e.substring(e.indexOf("(")+1,e.lastIndexOf(")")).split(":");
 				
 				if(details.length > 2)
 				{			
@@ -91,12 +91,14 @@ public class CheatCode {
 					int duration;
 					int amplifier;
 					
+					
 					try
 					{
 						duration = Integer.parseInt(details[1]);
 						amplifier = Integer.parseInt(details[2]);
-					} catch (NumberFormatException ex) { continue; }
+					} catch (NumberFormatException ex) { return false; }
 					
+					System.out.println(type.toString() + " " + duration + " " + amplifier);
 					if(type != null)
 						potionEffects.add(new PotionEffect(type, duration, amplifier));
 				}
