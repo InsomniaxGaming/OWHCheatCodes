@@ -43,7 +43,10 @@ public class CheatCode {
 		else if (money < 0)
 			Permissions.economy.bankWithdraw(player.getName(), Math.abs(money));
 		if(health > 0)
-			player.setHealth(player.getHealth()+health);
+			if(health+player.getHealth() > player.getMaxHealth())
+				player.setHealth(player.getMaxHealth());
+			else
+				player.setHealth(health);
 		if(damage > 0)
 			player.damage(damage);
 		if(kick)

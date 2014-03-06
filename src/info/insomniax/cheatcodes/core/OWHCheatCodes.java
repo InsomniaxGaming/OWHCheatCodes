@@ -51,6 +51,7 @@ public class OWHCheatCodes extends JavaPlugin{
 						if(cheat.code.equalsIgnoreCase(cheatCode))
 						{
 							cheat.applyCheat((Player)sender);
+							sendMessage(sender,ChatColor.GREEN+"CheatCode successful!");
 							cheatExists = true;
 						}
 					}
@@ -120,35 +121,60 @@ public class OWHCheatCodes extends JavaPlugin{
 						sendMessage(sender,"CheatCode (id #"+cheat.id+") added!");
 						return true;
 					}
+					if(args[0].equalsIgnoreCase("remove"))
+					{
+						CheatCode cheat = null;
+						
+						for(CheatCode c : cheats)
+						{
+							if(c.code.equalsIgnoreCase(args[1]))
+							{
+								cheat = c;
+							}
+						}
+						
+						if(cheat == null)
+						{
+							try
+							{
+								int codeIndex = Integer.parseInt(args[1]);
+								cheat = cheats.get(codeIndex);
+							} catch (NumberFormatException e)
+							{
+								sendMessage(sender, "Couldn't find that cheat.");
+								return true;
+							}
+						}
+						
+						cheats.remove(cheat);
+						sendMessage(sender,"Cheat successfully removed");
+					}
 				}	
 				if(args.length > 0)
 				{
-					if(permissions.has(sender, Permissions.getBaseNode()+".moderator"))
+					if(args[0].equalsIgnoreCase("list"))
 					{
-						if(args[0].equalsIgnoreCase("list"))
+						for(CheatCode cheat : cheats)
 						{
-							for(CheatCode cheat : cheats)
-							{
-								sendMessage(sender,cheat.id+": "+cheat.code);
-								sendMessage(sender,"Effects:");
-								sendMessage(sender,StringUtils.join(cheat.potionEffects,", "));
-								
-								String kick = String.valueOf(cheat.kick);
-								
-								if(cheat.kick)
-									kick += "-" + cheat.kickMessage;
-									
-								sendMessage(sender,"Health:"+cheat.health+" Damage:"+cheat.damage+" Kick:"+kick+" Money:"+cheat.money);
-							}						
+							sendMessage(sender,cheat.id+": "+cheat.code);
+							sendMessage(sender,"Effects:");
+							sendMessage(sender,StringUtils.join(cheat.potionEffects,", "));
 							
-							return true;
-						}
-						if(args[0].equalsIgnoreCase("listeffects"))
-						{
-							sendMessage(sender,StringUtils.join(PotionEffectType.values(), ", "));
+							String kick = String.valueOf(cheat.kick);
 							
-							return true;
-						}
+							if(cheat.kick)
+								kick += "-" + cheat.kickMessage;
+								
+							sendMessage(sender,"Health:"+cheat.health+" Damage:"+cheat.damage+" Kick:"+kick+" Money:"+cheat.money);
+						}						
+						
+						return true;
+					}
+					if(args[0].equalsIgnoreCase("listeffects"))
+					{
+						sendMessage(sender,StringUtils.join(PotionEffectType.values(), ", "));
+						
+						return true;
 					}
 				}
 			}

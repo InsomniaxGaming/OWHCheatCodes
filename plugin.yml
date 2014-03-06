@@ -9,7 +9,8 @@ commands:
     usage: |
 
       /owhcheatcodes create <code>
-      /owhcheatcodes addeffects <id or code> <effects>
+      /owhcheatcodes remove <code or id>
+      /owhcheatcodes addeffects <code or id> <effects>
       -Effects should be seperated by commas, and in the format of effect(<effect>:<duration>:<amplifier>), or one of the custom effects:
         -kick(<message>)
         -damage(<amount>)
