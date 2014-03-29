@@ -1,48 +1,70 @@
 package info.insomniax.cheatcodes.core;
 
-public class Limit {
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.bukkit.configuration.serialization.ConfigurationSerializable;
+import org.bukkit.configuration.serialization.SerializableAs;
+
+@SerializableAs("Limit")
+public class Limit implements ConfigurationSerializable{
 	
-	public enum Duration
+	public enum Unit
 	{
-		MILLISECONDS,SECONDS,MINUTES,HOURS,DAYS,WEEKS,MONTHS,YEARS,
-		MILLISECOND,SECOND,MINUTE,HOUR,DAY,WEEK,MONTH,YEAR,FOREVER;
+		MILLISECONDS,SECONDS,MINUTES,HOURS,DAYS,WEEKS,MONTHS,YEARS
+	}
+	
+	public static String SERIALIZED_DURATION="duration",SERIALIZED_amount="amount";
+	
+	public static int NEVER=-1,FOREVER=-2;
+	
+	int amount;
+	
+	int unit;
+	
+	public Limit(int amount, Unit unit)
+	{
+		this.amount = amount;
 		
-		public Duration getFromString(String value)
-		{
-			String withoutS = value;
-			
-			if(withoutS.endsWith("s") || withoutS.endsWith("S"))
-				withoutS = value.substring(0,value.length()-1);
-			
-			for(Duration d : Duration.values())
-			{
-				if(d.toString().equalsIgnoreCase(value))
-					return d;
-				if(d.toString().equalsIgnoreCase(withoutS))
-					return d;
-			}
-			return null;
+		switch(unit){
+		case MILLISECONDS: this.unit = Calendar.MILLISECOND; break;
+		case SECONDS: this.unit = Calendar.SECOND; break;
+		case MINUTES: this.unit = Calendar.MINUTE; break;
+		case HOURS: this.unit = Calendar.HOUR_OF_DAY; break;
+		case DAYS: this.unit = Calendar.DAY_OF_YEAR; break;
+		case WEEKS: this.unit = Calendar.WEEK_OF_YEAR; break;
+		case MONTHS: this.unit = Calendar.MONTH; break;
+		case YEARS: this.unit = Calendar.YEAR; break;
 		}
 	}
 	
-	//All values in MS
-	int millisecond = 1;
-	int second = millisecond*1000;
-	int minute = second*60;
-	int hour = minute*60;
-	int day = hour*24;
-	int week = day*7;
-	double month = week*4.34812;
-	double year = month*12;
-	
-	int quantity;
-	
-	Duration unit;
-	
-	public Limit(int quantity, Duration unit)
+	public Limit(Map<String, Object> map)
 	{
-		this.quantity = quantity;
-		this.unit = unit;
+		this.amount = (int) map.get(SERIALIZED_amount);
+		this.unit = (int) map.get(SERIALIZED_DURATION);
 	}
-
+	
+	public boolean passesLimit(Calendar calendar)
+	{
+		if(calendar == null)
+			return true;
+		else if(unit == NEVER)
+			return true;
+		else if(unit == FOREVER)
+			return false;
+		else
+		{
+			calendar.add(unit, amount);
+			return calendar.before(Calendar.getInstance()); // If not never and not forever, check if the limit is before current time
+		}
+	}
+	
+	@Override
+	public Map<String, Object> serialize() {
+		HashMap<String, Object> map = new HashMap<String, Object>();
+		map.put(SERIALIZED_DURATION,unit);
+		map.put(SERIALIZED_amount, amount);
+		return null;
+	}
 }

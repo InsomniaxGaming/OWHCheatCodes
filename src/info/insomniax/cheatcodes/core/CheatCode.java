@@ -1,5 +1,6 @@
 package info.insomniax.cheatcodes.core;
 
+import info.insomniax.cheatcodes.core.Limit.Unit;
 import info.insomniax.cheatcodes.permissions.Permissions;
 
 import java.util.ArrayList;
@@ -31,6 +32,8 @@ public class CheatCode implements ConfigurationSerializable{
 	boolean kick = false; // kick the player
 	String kickMessage;
 	
+	private Limit limit = new Limit(1, Unit.SECONDS); // The limiter for how often the cheat can be used
+	
 	public CheatCode(String code)
 	{
 		this.code = code;
@@ -49,6 +52,7 @@ public class CheatCode implements ConfigurationSerializable{
 		this.damage = (int) map.get("damage");
 		this.kick = (boolean) map.get("kick");
 		this.kickMessage = (String) map.get("kickmessage");
+		this.limit = (Limit) map.get("limit");
 		
 		this.id = CHEAT_COUNT;
 		CHEAT_COUNT++;
@@ -130,6 +134,16 @@ public class CheatCode implements ConfigurationSerializable{
 		}
 		return true;
 	}
+	
+	public void setLimit(Limit limit)
+	{
+		this.limit = limit;
+	}
+	
+	public Limit getLimit()
+	{
+		return limit;
+	}
 
 	@Override
 	public Map<String, Object> serialize() {
@@ -142,6 +156,7 @@ public class CheatCode implements ConfigurationSerializable{
 		map.put("kickmessage", kickMessage);
 		map.put("effects", potionEffects);
 		map.put("code", code);
+		map.put("limit", limit);
 	
 		return map;
 	}
