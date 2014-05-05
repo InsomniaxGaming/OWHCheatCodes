@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -63,7 +64,7 @@ public class OWHCheatCodes extends JavaPlugin{
 			{
 				if(permissions.has(sender, Permissions.getBaseNode()+".cheat"))
 				{
-					if(args.length > 1)
+					if(args.length < 1)
 						return false;
 					
 					String cheatCode = StringUtils.join(args, " ");
@@ -86,10 +87,11 @@ public class OWHCheatCodes extends JavaPlugin{
 							return true;
 						}
 						
-						this.sendMessage(sender, ChatColor.RED+"Invalid cheatcode!");
-						((Player)sender).damage(1.0);
 						
 					}
+					
+					this.sendMessage(sender, ChatColor.RED+"Invalid cheatcode!");
+					((Player)sender).damage(2.0);
 					return true;
 				}
 			}
@@ -109,7 +111,7 @@ public class OWHCheatCodes extends JavaPlugin{
 						
 						try
 						{
-							Limit newLimit = new Limit(Integer.parseInt(args[2]), Unit.valueOf(args[3]));
+							Limit newLimit = new Limit(Integer.parseInt(args[2]), Unit.valueOf(args[3].toUpperCase()));
 							cheat.setLimit(newLimit);
 							
 							sendMessage(sender,"Limit successfully set for cheat #" + cheat.id);
@@ -117,11 +119,13 @@ public class OWHCheatCodes extends JavaPlugin{
 						{
 							return false;
 						}
+						
+						return true;
 					}
 				}
 				if(args.length > 2)
 				{
-					
+
 					if(args[0].equalsIgnoreCase("addeffects"))
 					{
 						CheatCode cheat = this.getCheat(args[1]);
@@ -146,12 +150,85 @@ public class OWHCheatCodes extends JavaPlugin{
 						
 						return true;
 					}
+					
+					if(args[0].equalsIgnoreCase("removeeffects"))
+					{
+						CheatCode cheat = this.getCheat(args[1]);
+						
+						if(cheat == null)
+						{
+							sendMessage(sender, "Couldn't find that cheat.");
+							return true;
+						}
+						
+						//By now, we have successfully found a cheatcode
+						
+						String[] effects = args[2].split(",");
+						
+						if(cheat.removeEffects(effects))
+							sendMessage(sender,"Effects successfully added");
+						else
+						{
+							sendMessage(sender,"There was an error in your syntax");
+							return false;
+						}
+						
+						return true;
+					}
+					if(args[0].equalsIgnoreCase("setkick"))
+					{
+						CheatCode cheat = this.getCheat(args[1]);
+						
+						if(cheat == null)
+						{
+							sendMessage(sender, "Couldn't find that cheat.");
+							return true;
+						}
+						
+						if(args[2].equalsIgnoreCase("null") || args[2].equalsIgnoreCase("empty"))
+						{
+							cheat.kick = false;
+							cheat.kickMessage = "";
+
+							sendMessage(sender, "Kick successfully removed.");						
+						}
+						else
+						{						
+							cheat.kick = true;
+							cheat.kickMessage = StringUtils.join(args,' ',2,args.length);
+							
+							sendMessage(sender, "Kick successfully set.");
+						}
+						return true;
+					}
+					if(args[0].equalsIgnoreCase("setmessage"))
+					{
+						CheatCode cheat = this.getCheat(args[1]);
+						
+						if(cheat == null)
+						{
+							sendMessage(sender, "Couldn't find that cheat.");
+							return true;
+						}
+						
+						if(args[2].equalsIgnoreCase("null") || args[2].equalsIgnoreCase("empty"))
+						{
+							cheat.message = "";
+							sendMessage(sender,"Message successfully removed.");
+						}
+						else
+						{
+							cheat.message = StringUtils.join(args,' ',2,args.length);
+							sendMessage(sender,"Message successfully set.");
+						}
+						return true;
+					}
 				}
 				if(args.length > 1)
 				{
 					if(args[0].equalsIgnoreCase("create"))
 					{
-						CheatCode cheat = new CheatCode(args[1]);
+						CheatCode cheat = new CheatCode(StringUtils.join(args, " ", 1, args.length));
 						cheats.add(cheat);
 						
 						sendMessage(sender,"CheatCode (id #"+cheat.id+") added!");
@@ -179,9 +256,8 @@ public class OWHCheatCodes extends JavaPlugin{
 					{
 						for(CheatCode cheat : cheats)
 						{
-							sendMessage(sender,cheat.id+": "+cheat.code);
-							sendMessage(sender,"Effects:");
-							sendMessage(sender,StringUtils.join(cheat.potionEffects,", "));
+							sendMessage(sender,"#"+cheat.id+": "+cheat.code);
+							sendMessage(sender,"Effects: " + StringUtils.join(cheat.potionEffects,", "));
 							
 							String kick = String.valueOf(cheat.kick);
 							
@@ -269,6 +345,11 @@ public class OWHCheatCodes extends JavaPlugin{
 	{
 		getConfig().set("OWHCheatCodes.usage."+cheat.code+"."+player, DATE_FORMAT.format(Calendar.getInstance().getTime()));
 		saveConfig();
+	}
+	
+	public static void broadcast(String message)
+	{
+		Bukkit.broadcastMessage(message);
 	}
 	
 	public void sendMessage(CommandSender sender, String message)

@@ -10,11 +10,16 @@ commands:
 
       /owhcheatcodes create <code>
       /owhcheatcodes remove <code or id>
+      /owhcheatcodes setlimit <amount> <unit>
+      /owhcheatcodes setkick <code or id> <message | null>
+      /owhcheatcodes setmessage <code or id> <message | null>
+      /owhcheatcodes removeeffects <code or id> <effects (no parentheses on custom effects)>
       /owhcheatcodes addeffects <code or id> <effects>
       -Effects should be seperated by commas, and in the format of effect(<effect>:<duration>:<amplifier>), or one of the custom effects:
-        -kick(<message>)
         -damage(<amount>)
         -heal(<amount>)
         -money(<amount>) (negative will withdraw)
+        -lightning
       /owhcheatcodes list
       /owhcheatcodes listeffects
+      /owhcheatcodes listunits

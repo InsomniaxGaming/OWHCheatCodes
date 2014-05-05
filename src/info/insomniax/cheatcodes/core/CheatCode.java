@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.bukkit.ChatColor;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.SerializableAs;
 import org.bukkit.entity.Player;
@@ -32,6 +33,10 @@ public class CheatCode implements ConfigurationSerializable{
 	boolean kick = false; // kick the player
 	String kickMessage;
 	
+	String message = "";
+	
+	boolean lightning = false;
+	
 	private Limit limit = new Limit(1, Unit.SECONDS); // The limiter for how often the cheat can be used
 	
 	public CheatCode(String code)
@@ -53,6 +58,8 @@ public class CheatCode implements ConfigurationSerializable{
 		this.kick = (boolean) map.get("kick");
 		this.kickMessage = (String) map.get("kickmessage");
 		this.limit = (Limit) map.get("limit");
+		this.lightning = (boolean) map.get("lightning");
+		this.message = (String) map.get("message");
 		
 		this.id = CHEAT_COUNT;
 		CHEAT_COUNT++;
@@ -63,9 +70,15 @@ public class CheatCode implements ConfigurationSerializable{
 		for(PotionEffect p : potionEffects)
 			player.addPotionEffect(p);
 		if(money > 0)
+		{
+			player.sendMessage(ChatColor.DARK_GREEN + " " + money + " silvers has been added to your account.");
 			Permissions.economy.bankDeposit(player.getName(),money);
+		}
 		else if (money < 0)
+		{
+			player.sendMessage(ChatColor.DARK_GREEN + " " + Math.abs(money) + " silvers has been " + ChatColor.RED + "taken" + ChatColor.DARK_GREEN + " from your account.");
 			Permissions.economy.bankWithdraw(player.getName(), Math.abs(money));
+		}
 		if(health > 0)
 			if(health+player.getHealth() > player.getMaxHealth())
 				player.setHealth(player.getMaxHealth());
@@ -75,18 +88,17 @@ public class CheatCode implements ConfigurationSerializable{
 			player.damage(damage);
 		if(kick)
 			player.kickPlayer(kickMessage);
+		if(lightning)
+			player.getWorld().strikeLightning(player.getLocation());
+		if((message != null) && !(message.equals("")))
+			OWHCheatCodes.broadcast(message.replace("-p1", player.getName()));
 	}
 	
 	public boolean addEffects(String[] effects)
 	{
 		for(String e : effects)
 		{
-			if(e.startsWith("kick(") && e.endsWith(")"))
-			{
-				kick = true;
-				kickMessage = e.substring(e.indexOf("(")+1,e.lastIndexOf(")"));
-			}
-			else if(e.startsWith("heal(") && e.endsWith(")"))
+			if(e.startsWith("heal(") && e.endsWith(")"))
 			{
 				try
 				{
@@ -104,9 +116,12 @@ public class CheatCode implements ConfigurationSerializable{
 			{
 				try
 				{
-					System.out.println(e.substring(e.indexOf("(")+1,e.lastIndexOf(")")));
 					damage = Integer.parseInt(e.substring(e.indexOf("(")+1,e.lastIndexOf(")")));
 				} catch (NumberFormatException ex){ return false; }
+			}
+			else if(e.equalsIgnoreCase("lightning"))
+			{
+				lightning = true;
 			}
 			if(e.startsWith("effect(") && e.endsWith(")"))
 			{
@@ -125,9 +140,71 @@ public class CheatCode implements ConfigurationSerializable{
 						amplifier = Integer.parseInt(details[2]);
 					} catch (NumberFormatException ex) { return false; }
 					
-					System.out.println(type.toString() + " " + duration + " " + amplifier);
 					if(type != null)
 						potionEffects.add(new PotionEffect(type, duration, amplifier));
+				}
+				
+			}
+		}
+		return true;
+	}
+	
+	public boolean removeEffects(String[] effects)
+	{
+		for(String e : effects)
+		{
+			if(e.equalsIgnoreCase("kick()"))
+			{
+				kick = false;
+			}
+			else if(e.equalsIgnoreCase("heal"))
+			{
+				health = 0;
+			}
+			else if(e.equalsIgnoreCase("money"))
+			{
+				money = 0;
+			}
+			else if(e.equalsIgnoreCase("damage"))
+			{
+				damage = 0;
+			}
+			else if(e.equalsIgnoreCase("lightning"))
+			{
+				lightning = false;
+			}
+			else if(e.equalsIgnoreCase("message"))
+			{
+				message = "";
+			}
+			if(e.startsWith("effect(") && e.endsWith(")"))
+			{
+				String[] details = e.substring(e.indexOf("(")+1,e.lastIndexOf(")")).split(":");
+				
+				if(details.length > 2)
+				{			
+					PotionEffectType type = PotionEffectType.getByName(details[0]);
+					int duration;
+					int amplifier;
+					
+					
+					try
+					{
+						duration = Integer.parseInt(details[1]);
+						amplifier = Integer.parseInt(details[2]);
+					} catch (NumberFormatException ex) { return false; }
+					
+					PotionEffect potionToRemove = null;
+					
+					for(PotionEffect pe : potionEffects)
+					{
+						if(pe.getType() == type && pe.getDuration() == duration && pe.getAmplifier() == amplifier)
+						{
+							potionToRemove = pe;
+						}
+					}
+					
+					potionEffects.remove(potionToRemove);
 				}
 				
 			}
@@ -157,6 +234,8 @@ public class CheatCode implements ConfigurationSerializable{
 		map.put("effects", potionEffects);
 		map.put("code", code);
 		map.put("limit", limit);
+		map.put("lightning", lightning);
+		map.put("message", message);
 	
 		return map;
 	}

@@ -15,47 +15,42 @@ public class Limit implements ConfigurationSerializable{
 		MILLISECONDS,SECONDS,MINUTES,HOURS,DAYS,WEEKS,MONTHS,YEARS
 	}
 	
-	public static String SERIALIZED_DURATION="duration",SERIALIZED_amount="amount";
-	
-	public static int NEVER=-1,FOREVER=-2;
+	public static String SERIALIZED_UNIT="unit",SERIALIZED_amount="amount";
 	
 	int amount;
 	
-	int unit;
+	int calendarUnit;
 	
 	public Limit(int amount, Unit unit)
 	{
 		this.amount = amount;
 		
-		switch(unit){
-		case MILLISECONDS: this.unit = Calendar.MILLISECOND; break;
-		case SECONDS: this.unit = Calendar.SECOND; break;
-		case MINUTES: this.unit = Calendar.MINUTE; break;
-		case HOURS: this.unit = Calendar.HOUR_OF_DAY; break;
-		case DAYS: this.unit = Calendar.DAY_OF_YEAR; break;
-		case WEEKS: this.unit = Calendar.WEEK_OF_YEAR; break;
-		case MONTHS: this.unit = Calendar.MONTH; break;
-		case YEARS: this.unit = Calendar.YEAR; break;
+		switch(unit)
+		{
+		case MILLISECONDS: this.calendarUnit = Calendar.MILLISECOND; break;
+		case SECONDS: this.calendarUnit = Calendar.SECOND; break;
+		case MINUTES: this.calendarUnit = Calendar.MINUTE; break;
+		case HOURS: this.calendarUnit = Calendar.HOUR_OF_DAY; break;
+		case DAYS: this.calendarUnit = Calendar.DAY_OF_YEAR; break;
+		case WEEKS: this.calendarUnit = Calendar.WEEK_OF_YEAR; break;
+		case MONTHS: this.calendarUnit = Calendar.MONTH; break;
+		case YEARS: this.calendarUnit = Calendar.YEAR; break;
 		}
 	}
 	
 	public Limit(Map<String, Object> map)
 	{
 		this.amount = (int) map.get(SERIALIZED_amount);
-		this.unit = (int) map.get(SERIALIZED_DURATION);
+		this.calendarUnit = (int) map.get(SERIALIZED_UNIT);
 	}
 	
 	public boolean passesLimit(Calendar calendar)
 	{
 		if(calendar == null)
 			return true;
-		else if(unit == NEVER)
-			return true;
-		else if(unit == FOREVER)
-			return false;
 		else
 		{
-			calendar.add(unit, amount);
+			calendar.add(calendarUnit, amount);
 			return calendar.before(Calendar.getInstance()); // If not never and not forever, check if the limit is before current time
 		}
 	}
@@ -63,8 +58,8 @@ public class Limit implements ConfigurationSerializable{
 	@Override
 	public Map<String, Object> serialize() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
-		map.put(SERIALIZED_DURATION,unit);
+		map.put(SERIALIZED_UNIT,calendarUnit);
 		map.put(SERIALIZED_amount, amount);
-		return null;
+		return map;
 	}
 }
